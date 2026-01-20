@@ -35,15 +35,12 @@ function VerifyEmailPage() {
       }
 
       try {
-        const data = await authApi.verifyEmail(token);
-
-        tokenStore.set(data.access_token);
-        queryClient.setQueryData(CURRENT_USER_KEY, data.user);
-
+         await authApi.verifyEmail(token);
+         
         setStatus('success');
 
         setTimeout(() => {
-          navigate({ to: '/dashboard' });
+          navigate({ to: '/login' });
         }, 800);
       } catch (err) {
         console.error('Verification failed:', err);

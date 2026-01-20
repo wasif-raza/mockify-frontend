@@ -81,8 +81,8 @@ function RegisterPage() {
         'Account created successfully. Please check your email to verify your account.',
       );
 
-      // CHANGED: redirect to login instead of dashboard
-      navigate({ to: '/dashboard' });
+      // CHANGED: redirect to login 
+      navigate({ to: '/login' });
     } catch (error) {
       toast.error(handleApiError(error));
     } finally {
