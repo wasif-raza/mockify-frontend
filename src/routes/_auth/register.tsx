@@ -51,8 +51,6 @@ type RegisterForm = z.infer<typeof registerSchema>;
 
 function RegisterPage() {
   const { register } = useAuth();
-  // CHANGED: removed `isAuthenticated`
-  // WHY: registration should NOT auto-redirect based on auth state
 
   const { initiateGoogleLogin } = useGoogleLogin();
   const navigate = useNavigate();
@@ -68,21 +66,17 @@ function RegisterPage() {
     },
   });
 
-  //  REMOVED useEffect that redirected to /dashboard
-  // user is NOT verified yet, should stay public
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
     try {
       await register(data.name, data.email, data.password);
 
-      //  CHANGED: message now informs about email verification
       toast.success(
         'Account created successfully. Please check your email to verify your account.',
       );
-
-      // CHANGED: redirect to login instead of dashboard
-      navigate({ to: '/dashboard' });
+      
+      navigate({ to: '/login' });
     } catch (error) {
       toast.error(handleApiError(error));
     } finally {

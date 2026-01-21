@@ -3,8 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { useQueryClient } from '@tanstack/react-query';
-import { CURRENT_USER_KEY } from '@/hooks/use-auth';
-import { tokenStore } from '@/api/token';
 import { authApi } from '@/api/auth';
 
 export const Route = createFileRoute('/_public/verify-email')({
@@ -35,15 +33,11 @@ function VerifyEmailPage() {
       }
 
       try {
-        const data = await authApi.verifyEmail(token);
-
-        tokenStore.set(data.access_token);
-        queryClient.setQueryData(CURRENT_USER_KEY, data.user);
+         await authApi.verifyEmail(token);
 
         setStatus('success');
-
         setTimeout(() => {
-          navigate({ to: '/dashboard' });
+          navigate({ to: '/login' });
         }, 800);
       } catch (err) {
         console.error('Verification failed:', err);
