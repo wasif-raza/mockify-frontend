@@ -29,8 +29,6 @@ export function useLogin() {
       await queryClient.invalidateQueries({
         queryKey: CURRENT_USER_KEY,
       });
-
-      toast.success('Logged in');
     },
     onError: (err: any) => {
       toast.error(err.response?.data?.message || 'Invalid login');
@@ -42,19 +40,12 @@ export function useRegister() {
   return useMutation({
     mutationFn: (data: RegisterRequest) => authApi.register(data),
 
-    onSuccess: () => {
-      // ✅ DO NOT set token
-      // ✅ DO NOT fetch current user
-      toast.success(
-        'Account created successfully. Please check your email to verify your account.',
-      );
-    },
-
     onError: (err: any) => {
       toast.error(err.response?.data?.message || 'Registration failed');
     },
   });
 }
+
 
 export function useLogout() {
   const queryClient = useQueryClient();
@@ -83,14 +74,15 @@ export function useAuthBootstrap() {
       try {
         const res = await authApi.refresh();
         tokenStore.set(res.access_token);
+
         await queryClient.invalidateQueries({
           queryKey: CURRENT_USER_KEY,
         });
 
-        return res.user;
+        return true;
       } catch {
         tokenStore.clear();
-        return null;
+        return false;
       }
     },
     retry: false,

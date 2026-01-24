@@ -21,44 +21,46 @@ apiClient.interceptors.request.use((config) => {
 
 // Refresh-token interceptor
 apiClient.interceptors.response.use(
-  (response) => response,
+  (res) => res,
   async (error) => {
     const originalRequest = error.config;
 
-    const isAuthRoute =
+    // If error is not 401, reject
+    if (!error.response || error.response.status !== 401) {
+      return Promise.reject(error);
+    }
+
+    // Prevent infinite loops
+    if (originalRequest._retry) {
+      tokenStore.clear();
+      return Promise.reject(error);
+    }
+    originalRequest._retry = true;
+
+    // Do not attempt refresh for auth endpoints
+    if (
       originalRequest.url?.includes('/auth/login') ||
       originalRequest.url?.includes('/auth/register') ||
       originalRequest.url?.includes('/auth/refresh') ||
-      originalRequest.url?.includes('/auth/logout');
-
-    // If the request is to an auth route or the error is not 401, reject it
-    if (isAuthRoute || error.response?.status !== 401) {
+      originalRequest.url?.includes('/auth/logout') ||
+      originalRequest.url?.includes('/auth/me')
+    ) {
+      tokenStore.clear();
       return Promise.reject(error);
     }
 
-    let refreshPromise = tokenStore.getRefreshPromise();
-
-    // If there's no ongoing refresh, start one
-    if (!refreshPromise) {
-      refreshPromise = (async () => {
-        const res = await apiClient.post('/auth/refresh');
-        tokenStore.set(res.data.access_token);
-        return res.data.access_token;
-      })();
-
-      tokenStore.setRefreshPromise(refreshPromise);
-    }
-
-    // Wait for the refresh to complete
+    // Attempt to refresh token
     try {
-      const newToken = await refreshPromise;
-      originalRequest.headers.Authorization = `Bearer ${newToken}`;
+      const res = await apiClient.post('/auth/refresh');
+      tokenStore.set(res.data.access_token);
+      originalRequest.headers.Authorization =
+        `Bearer ${res.data.access_token}`;
+
       return apiClient(originalRequest);
     } catch {
       tokenStore.clear();
+      window.location.href = '/login';
       return Promise.reject(error);
-    } finally {
-      tokenStore.setRefreshPromise(null);
     }
   },
 );

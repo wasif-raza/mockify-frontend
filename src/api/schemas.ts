@@ -2,36 +2,62 @@ import { apiClient } from './client';
 import type { MockSchema, MockSchemaDetail } from './types';
 
 export const schemasApi = {
-  getByProject: async (projectId: string): Promise<MockSchema[]> => {
+  getByProject: async (
+    orgSlug: string,
+    projectSlug: string,
+  ): Promise<MockSchema[]> => {
     const response = await apiClient.get<MockSchema[]>(
-      `/projects/${projectId}/schemas`,
+      `/${orgSlug}/${projectSlug}/schemas`,
     );
     return response.data;
   },
 
-  getById: async (id: string): Promise<MockSchemaDetail> => {
-    const response = await apiClient.get<MockSchemaDetail>(`/schemas/${id}`);
+  getBySlug: async (
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+  ): Promise<MockSchemaDetail> => {
+    const response = await apiClient.get<MockSchemaDetail>(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}`
+    );
     return response.data;
   },
 
-  create: async (data: {
+  create: async (
+    orgSlug: string,
+    projectSlug: string,
+    data: {
     name: string;
-    projectId: string;
-    schemaJson: Record<string, object>;
+    schemaJson: Record<string, any>;
   }): Promise<MockSchema> => {
-    const response = await apiClient.post<MockSchema>('/schemas', data);
+    const response = await apiClient.post<MockSchema>(
+      `/${orgSlug}/${projectSlug}/schemas`, data);
     return response.data;
   },
 
   update: async (
-    id: string,
-    data: { name: string; schemaJson: Record<string, object> },
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+    data: {
+      name: string;
+      schemaJson: Record<string, any>;
+    },
   ): Promise<MockSchema> => {
-    const response = await apiClient.put<MockSchema>(`/schemas/${id}`, data);
-    return response.data;
+    const res = await apiClient.put(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}`,
+      data,
+    );
+    return res.data;
   },
 
-  delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/schemas/${id}`);
+  delete: async (
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+  ): Promise<void> => {
+    await apiClient.delete(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}`,
+    );
   },
 };

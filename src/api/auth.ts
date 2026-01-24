@@ -7,8 +7,15 @@ import type {
 } from './types';
 
 export const authApi = {
-  register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post<AuthResponse>('/auth/register', data);
+  register: async (data: RegisterRequest): Promise<void> => {
+    await apiClient.post('/auth/register', data);
+  },
+
+  verifyEmail: async (token: string): Promise<AuthResponse> => {
+    const response = await apiClient.get<AuthResponse>(
+      '/auth/register/verify',
+      { params: { token } },
+    );
     return response.data;
   },
 
@@ -46,12 +53,5 @@ export const authApi = {
     const baseUrl =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/';
     return `${baseUrl}/oauth2/authorization/google`;
-  },
-  verifyEmail: async (token: string): Promise<AuthResponse> => {
-    const response = await apiClient.get<AuthResponse>(
-      '/auth/register/verify',
-      { params: { token } },
-    );
-    return response.data;
   },
 };

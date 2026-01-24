@@ -10,11 +10,11 @@ export function useOrganizations() {
   });
 }
 
-export function useOrganization(id: string) {
+export function useOrganization(slug: string) {
   return useQuery({
-    queryKey: ['organizations', id],
-    queryFn: () => organizationsApi.getById(id),
-    enabled: !!id,
+    queryKey: ['organizations', slug],
+    queryFn: () => organizationsApi.getBySlug(slug),
+    enabled: !!slug,
   });
 }
 
@@ -25,7 +25,6 @@ export function useCreateOrganization() {
     mutationFn: (data: OrganizationInput) => organizationsApi.create(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organization created successfully');
     },
     onError: (error: any) => {
       toast.error(
@@ -39,12 +38,11 @@ export function useUpdateOrganization() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: OrganizationInput }) =>
-      organizationsApi.update(id, data),
-    onSuccess: (_, { id }) => {
+    mutationFn: ({ slug, data }: { slug: string; data: OrganizationInput }) =>
+      organizationsApi.update(slug, data),
+    onSuccess: (_, { slug }) => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      queryClient.invalidateQueries({ queryKey: ['organizations', id] });
-      toast.success('Organization updated successfully');
+      queryClient.invalidateQueries({ queryKey: ['organizations', slug] });
     },
     onError: (error: any) => {
       toast.error(
@@ -58,10 +56,9 @@ export function useDeleteOrganization() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => organizationsApi.delete(id),
+    mutationFn: (slug: string) => organizationsApi.delete(slug),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Organization deleted successfully');
     },
     onError: (error: any) => {
       toast.error(
