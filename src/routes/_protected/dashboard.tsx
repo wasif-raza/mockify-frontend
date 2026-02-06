@@ -138,8 +138,8 @@ export function DashboardPage() {
               {organizations.slice(0, 5).map((org) => (
                 <Link
                   key={org.id}
-                  to="/organizations/$orgId"
-                  params={{ orgId: org.id }}
+                  to="/organizations/$orgSlug"
+                  params={{ orgSlug: org.slug }}
                   className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/50 transition-colors"
                 >
                   <div className="flex items-center gap-3">

@@ -2,15 +2,20 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  username?: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+  providerName?: string;
   created_at: string;
+  updated_at?: string;
 }
 
 export interface AuthResponse {
   access_token: string;
-  refresh_token: string;
   token_type: string;
   expires_in: number;
-  user: User;
+  user?: User;
 }
 
 export interface LoginRequest {
@@ -27,23 +32,28 @@ export interface RegisterRequest {
 export interface Organization {
   id: string;
   name: string;
+  slug: string;
   ownerId: string;
   ownerName: string;
   createdAt: string;
+  updatedAt?: string;
   projectCount: number;
 }
 
 export interface OrganizationDetail {
   id: string;
   name: string;
+  slug?: string;
   owner: User;
   createdAt: string;
   projects: ProjectSummary[];
 }
 
+
 export interface ProjectSummary {
   id: string;
   name: string;
+  slug: string;
   schemaCount: number;
   createdAt: string;
 }
@@ -51,9 +61,11 @@ export interface ProjectSummary {
 export interface Project {
   id: string;
   name: string;
+  slug: string;
   organizationId: string;
   organizationName: string;
   createdAt: string;
+  updatedAt?: string;
   schemaCount: number;
   totalRecords: number;
 }
@@ -61,6 +73,7 @@ export interface Project {
 export interface ProjectDetail {
   id: string;
   name: string;
+  slug?: string;
   organization: {
     id: string;
     name: string;
@@ -69,6 +82,7 @@ export interface ProjectDetail {
   schemas: MockSchemaSummary[];
   stats: ProjectStats;
 }
+
 
 export interface ProjectStats {
   totalSchemas: number;
@@ -87,6 +101,7 @@ export interface MockSchemaSummary {
 export interface MockSchema {
   id: string;
   name: string;
+  slug: string;
   projectId: string;
   projectName: string;
   schemaJson: Record<string, object>;
@@ -98,6 +113,7 @@ export interface MockSchema {
 export interface MockSchemaDetail {
   id: string;
   name: string;
+  slug?: string;
   project: {
     id: string;
     name: string;

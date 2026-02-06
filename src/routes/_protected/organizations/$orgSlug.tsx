@@ -27,15 +27,15 @@ import { Plus, FolderKanban, Database, Trash2, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatRelativeTime } from '@/lib/utils';
 
-export const Route = createFileRoute('/_protected/organizations/$orgId')({
+export const Route = createFileRoute('/_protected/organizations/$orgSlug')({
   component: OrganizationDetail,
 });
 
 export function OrganizationDetail() {
-  const { orgId } = Route.useParams();
-  const { data: organization, isLoading } = useOrganization(orgId);
-  const createProjectMutation = useCreateProject();
-  const deleteProjectMutation = useDeleteProject();
+  const { orgSlug } = Route.useParams();
+  const { data: organization, isLoading } = useOrganization(orgSlug);
+  const createProjectMutation = useCreateProject(orgSlug);
+  const deleteProjectMutation = useDeleteProject(orgSlug);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [projectName, setProjectName] = useState('');
@@ -47,16 +47,18 @@ export function OrganizationDetail() {
     }
 
     await createProjectMutation.mutateAsync({
-      name: projectName,
-      organizationId: orgId,
+      name: projectName ,
     });
     setProjectName('');
     setIsCreateOpen(false);
   };
 
-  const handleDeleteProject = async (id: string, name: string) => {
+  const handleDeleteProject = async (
+    projectSlug: string,
+    name: string,
+  ) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      await deleteProjectMutation.mutateAsync(id);
+      await deleteProjectMutation.mutateAsync(projectSlug);
     }
   };
 
@@ -165,8 +167,11 @@ export function OrganizationDetail() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <Link
-                      to="/projects/$projectId"
-                      params={{ projectId: project.id }}
+                      to="/$orgSlug/$projectSlug"
+                      params={{ 
+                        orgSlug: orgSlug,
+                        projectSlug: project.slug
+                      }}
                       className="flex-1"
                     >
                       <CardTitle className="hover:text-primary transition-colors">
@@ -178,7 +183,7 @@ export function OrganizationDetail() {
                       size="icon"
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
                       onClick={() =>
-                        handleDeleteProject(project.id, project.name)
+                        handleDeleteProject(project.slug, project.name)
                       }
                     >
                       <Trash2 className="h-4 w-4" />

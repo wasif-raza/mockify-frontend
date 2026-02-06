@@ -3,78 +3,77 @@ import { toast } from 'sonner';
 import { projectsApi } from '@/api/projects';
 import type { ProjectInput } from '@/lib/validations';
 
-export function useProjects(organizationId: string) {
+export function useProjects(orgSlug: string) {
   return useQuery({
-    queryKey: ['projects', organizationId],
-    queryFn: () => projectsApi.getAll(organizationId),
-    enabled: !!organizationId,
+    queryKey: ['projects', orgSlug],
+    queryFn: () => projectsApi.getAllByOrg(orgSlug),
+    enabled: !!orgSlug,
   });
 }
 
-export function useProject(id: string) {
+export function useProject(orgSlug: string, projectSlug: string) {
   return useQuery({
-    queryKey: ['projects', id],
-    queryFn: () => projectsApi.getById(id),
-    enabled: !!id,
+    queryKey: ['projects', orgSlug, projectSlug],
+    queryFn: () => projectsApi.getBySlug(orgSlug, projectSlug),
+    enabled: !!orgSlug && !!projectSlug,
   });
 }
 
-export function useCreateProject() {
+export function useCreateProject(orgSlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: ProjectInput) => projectsApi.create(data),
-    onSuccess: (_, data) => {
+    mutationFn: (data: { name: string }) =>
+      projectsApi.create(orgSlug, data),
+
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['projects', data.organizationId],
+        queryKey: ['projects', orgSlug],
       });
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
       queryClient.invalidateQueries({
-        queryKey: ['organizations', data.organizationId],
+        queryKey: ['organizations', orgSlug],
       });
-      toast.success('Project created successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create project');
     },
   });
 }
 
-export function useUpdateProject() {
+export function useUpdateProject(orgSlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
-      id,
+      projectSlug,
       data,
     }: {
-      id: string;
-      data: Omit<ProjectInput, 'organizationId'>;
-    }) => projectsApi.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['projects', id] });
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Project updated successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update project');
+      projectSlug: string;
+      data: { name: string };
+    }) => projectsApi.update(orgSlug, projectSlug, data),
+
+    onSuccess: (_, { projectSlug }) => {
+      queryClient.invalidateQueries({
+        queryKey: ['projects', orgSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['projects', orgSlug, projectSlug],
+      });
     },
   });
 }
 
-export function useDeleteProject() {
+export function useDeleteProject(orgSlug: string) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => projectsApi.delete(id),
+    mutationFn: (projectSlug: string) =>
+      projectsApi.delete(orgSlug, projectSlug),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['organizations'] });
-      toast.success('Project deleted successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete project');
+      queryClient.invalidateQueries({
+        queryKey: ['projects', orgSlug],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['organizations', orgSlug],
+      });
     },
   });
 }

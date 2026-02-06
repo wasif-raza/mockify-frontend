@@ -25,36 +25,44 @@ import {
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-export const Route = createFileRoute('/_protected/schemas/$schemaId')({
+export const Route = createFileRoute('/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug')({
   component: SchemaDetail,
 });
 
 function SchemaDetail() {
-  const { schemaId } = Route.useParams();
-  const { data: schema, isLoading } = useSchema(schemaId);
-  const createRecordMutation = useCreateRecord();
-  const deleteRecordMutation = useDeleteRecord();
+  const { orgSlug, projectSlug, schemaSlug } = Route.useParams();
+  const { data: schema, isLoading } = useSchema(orgSlug, projectSlug, schemaSlug);
+  const createRecordMutation = useCreateRecord(orgSlug, projectSlug, schemaSlug);
+  const deleteRecordMutation = useDeleteRecord(orgSlug, projectSlug, schemaSlug);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [recordData, setRecordData] = useState('{}');
 
-  const handleCreateRecord = async (schemaId: string) => {
+  const handleCreateRecord = async () => {
     try {
-      const data = JSON.parse(recordData);
-      await createRecordMutation.mutateAsync({
-        schemaId: schemaId,
-        data: { data },
-      });
+      const parsed = JSON.parse(recordData);
+
+      console.log('Parsed JSON:', parsed);
+
+      const payload = {
+        data: parsed,
+      };
+
+      console.log('Final payload sent to API:', payload);
+
+      await createRecordMutation.mutateAsync(payload);
+
       setRecordData('{}');
       setIsCreateOpen(false);
-    } catch (error) {
+    } catch (err) {
+      console.error('Create record error:', err);
       toast.error('Invalid JSON data');
     }
   };
 
-  const handleDeleteRecord = async (id: string) => {
+  const handleDeleteRecord = async (RecordId: string) => {
     if (confirm('Are you sure you want to delete this record?')) {
-      await deleteRecordMutation.mutateAsync(id);
+      await deleteRecordMutation.mutateAsync(RecordId);
     }
   };
 
@@ -83,8 +91,11 @@ function SchemaDetail() {
     <div className="space-y-6">
       <div>
         <Link
-          to="/projects/$projectId"
-          params={{ projectId: schema.project.id }}
+          to="/$orgSlug/$projectSlug"
+          params={{
+            orgSlug: orgSlug,
+            projectSlug: projectSlug,
+          }}
         >
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -133,7 +144,7 @@ function SchemaDetail() {
                     Cancel
                   </Button>
                   <Button
-                    onClick={() => handleCreateRecord(schemaId)}
+                    onClick={() => handleCreateRecord(schemaSlug)}
                     disabled={createRecordMutation.isPending}
                   >
                     {createRecordMutation.isPending ? 'Creating...' : 'Create'}
