@@ -3,11 +3,13 @@ import type { MockRecord } from './types';
 
 export const recordsApi = {
   create: async (
-    schemaId: string,
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
     body: { data: Record<string, any> },
   ): Promise<MockRecord> => {
     const response = await apiClient.post<MockRecord>(
-      `/schemas/${schemaId}/records`,
+      `/${orgSlug}/${projectSlug}/${schemaSlug}/records`,
       {
         data: body.data,
       },
@@ -15,27 +17,51 @@ export const recordsApi = {
     return response.data;
   },
 
-  getAll: async (schemaId: string): Promise<MockRecord[]> => {
+  getAll: async (
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string
+  ): Promise<MockRecord[]> => {
     const response = await apiClient.get<MockRecord[]>(
-      `/schemas/${schemaId}/records`,
+      `/${orgSlug}/${projectSlug}/${schemaSlug}/records`,
     );
     return response.data;
   },
 
-  getById: async (id: string): Promise<MockRecord> => {
-    const response = await apiClient.get<MockRecord>(`/records/${id}`);
+  getById: async (
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+    recordId: string
+  ): Promise<MockRecord> => {
+    const response = await apiClient.get<MockRecord>(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}/records/${recordId}`,
+    );
     return response.data;
   },
 
   update: async (
-    id: string,
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+    recordId: string,
     data: { data: Record<string, any>; ttlMinutes?: number },
   ): Promise<MockRecord> => {
-    const response = await apiClient.put<MockRecord>(`/records/${id}`, data);
+    const response = await apiClient.put<MockRecord>(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}/records/${recordId}`,
+      data,
+    );
     return response.data;
   },
 
-  delete: async (id: string): Promise<void> => {
-    await apiClient.delete(`/records/${id}`);
+  delete: async (
+    orgSlug: string,
+    projectSlug: string,
+    schemaSlug: string,
+    recordId: string
+  ): Promise<void> => {
+    await apiClient.delete(
+      `/${orgSlug}/${projectSlug}/${schemaSlug}/records/${recordId}`
+    );
   },
 };

@@ -2,82 +2,108 @@ import { schemasApi } from '@/api/schemas';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export function useSchemas(projectId: string) {
+export function useSchemas(
+  orgSlug: string, 
+  projectSlug: string,
+) {
   return useQuery({
-    queryKey: ['projects', projectId, 'schemas'],
-    queryFn: () => schemasApi.getByProject(projectId),
-    enabled: !!projectId,
+    queryKey: ['schemas', orgSlug, projectSlug],
+    queryFn: () =>
+      schemasApi.getByProject(orgSlug, projectSlug),
+    enabled: !!orgSlug && !!projectSlug,
   });
 }
 
-export function useSchema(id: string) {
+export function useSchema(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+) {
   return useQuery({
-    queryKey: ['schemas', id],
-    queryFn: () => schemasApi.getById(id),
-    enabled: !!id,
+    queryKey: ['schemas', orgSlug, projectSlug, schemaSlug],
+    queryFn: () =>
+      schemasApi.getBySlug(orgSlug, projectSlug, schemaSlug),
+    enabled: !!orgSlug && !!projectSlug && !!schemaSlug,
   });
 }
 
-export function useCreateSchema() {
+export function useCreateSchema(
+  orgSlug: string, 
+  projectSlug: string
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: (data: {
       name: string;
-      projectId: string;
       schemaJson: Record<string, any>;
-    }) => schemasApi.create(data),
-    onSuccess: (_, variables) => {
+    }) =>
+      schemasApi.create(orgSlug, projectSlug, data),
+
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['projects', variables.projectId, 'schemas'],
+        queryKey: ['schemas', orgSlug, projectSlug],
       });
       queryClient.invalidateQueries({
-        queryKey: ['projects', variables.projectId],
+        queryKey: ['projects', orgSlug, projectSlug],
       });
-      toast.success('Schema created successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to create schema');
     },
   });
 }
 
-export function useUpdateSchema() {
+export function useUpdateSchema(
+  orgSlug: string, 
+  projectSlug: string
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({
-      id,
+      schemaSlug,
       data,
     }: {
-      id: string;
+      schemaSlug: string;
       data: { name: string; schemaJson: Record<string, any> };
-    }) => schemasApi.update(id, data),
-    onSuccess: (result) => {
-      queryClient.invalidateQueries({ queryKey: ['schemas', result.id] });
+    }) =>
+      schemasApi.update(orgSlug, projectSlug, schemaSlug, data),
+
+    onSuccess: (_, { schemaSlug }) => {
       queryClient.invalidateQueries({
-        queryKey: ['projects', result.projectId, 'schemas'],
+        queryKey: ['schemas', orgSlug, projectSlug],
       });
-      toast.success('Schema updated successfully');
-    },
-    onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to update schema');
+      queryClient.invalidateQueries({
+        queryKey: [
+          'schemas',
+          orgSlug,
+          projectSlug,
+          schemaSlug,
+        ],
+      });
     },
   });
 }
 
-export function useDeleteSchema() {
+export function useDeleteSchema(
+  orgSlug: string, 
+  projectSlug: string
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => schemasApi.delete(id),
+    mutationFn: (schemaSlug: string) =>
+      schemasApi.delete(orgSlug, projectSlug, schemaSlug),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['projects'] });
-      queryClient.invalidateQueries({ queryKey: ['schemas'] });
-      toast.success('Schema deleted successfully');
+      queryClient.invalidateQueries({
+        queryKey: ['projects', orgSlug, projectSlug],
+      });
     },
+
     onError: (error: any) => {
-      toast.error(error.response?.data?.message || 'Failed to delete schema');
+      toast.error(
+        error.response?.data?.message || 'Failed to delete schema',
+      );
     },
+    
   });
 }

@@ -54,9 +54,9 @@ export function OrganizationsPage() {
     setIsCreateOpen(false);
   };
 
-  const handleDelete = async (id: string, name: string) => {
+  const handleDelete = async (slug: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      await deleteMutation.mutateAsync(id);
+      await deleteMutation.mutateAsync(slug);
     }
   };
 
@@ -154,8 +154,8 @@ export function OrganizationsPage() {
               <CardHeader>
                 <div className="flex items-start justify-between">
                   <Link
-                    to="/organizations/$orgId"
-                    params={{ orgId: org.id }}
+                    to="/organizations/$orgSlug"
+                    params={{ orgSlug: org.slug }}
                     className="flex-1"
                   >
                     <CardTitle className="hover:text-primary transition-colors">
@@ -166,7 +166,7 @@ export function OrganizationsPage() {
                     variant="ghost"
                     size="icon"
                     className="opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={() => handleDelete(org.id, org.name)}
+                    onClick={() => handleDelete(org.slug, org.name)}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>

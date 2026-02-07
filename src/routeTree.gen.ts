@@ -22,9 +22,9 @@ import { Route as AuthResetPasswordRouteImport } from './routes/_auth/reset-pass
 import { Route as AuthRegisterRouteImport } from './routes/_auth/register'
 import { Route as AuthLoginRouteImport } from './routes/_auth/login'
 import { Route as ProtectedOrganizationsIndexRouteImport } from './routes/_protected/organizations/index'
-import { Route as ProtectedSchemasSchemaIdRouteImport } from './routes/_protected/schemas/$schemaId'
-import { Route as ProtectedProjectsProjectIdRouteImport } from './routes/_protected/projects/$projectId'
-import { Route as ProtectedOrganizationsOrgIdRouteImport } from './routes/_protected/organizations/$orgId'
+import { Route as ProtectedOrganizationsOrgSlugRouteImport } from './routes/_protected/organizations/$orgSlug'
+import { Route as ProtectedProjectsOrgSlugProjectSlugRouteImport } from './routes/_protected/_projects/$orgSlug/$projectSlug'
+import { Route as ProtectedSchemasOrgSlugProjectSlugSchemaSlugRouteImport } from './routes/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug'
 
 const SplatRoute = SplatRouteImport.update({
   id: '/$',
@@ -89,22 +89,22 @@ const ProtectedOrganizationsIndexRoute =
     path: '/organizations/',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const ProtectedSchemasSchemaIdRoute =
-  ProtectedSchemasSchemaIdRouteImport.update({
-    id: '/schemas/$schemaId',
-    path: '/schemas/$schemaId',
+const ProtectedOrganizationsOrgSlugRoute =
+  ProtectedOrganizationsOrgSlugRouteImport.update({
+    id: '/organizations/$orgSlug',
+    path: '/organizations/$orgSlug',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const ProtectedProjectsProjectIdRoute =
-  ProtectedProjectsProjectIdRouteImport.update({
-    id: '/projects/$projectId',
-    path: '/projects/$projectId',
+const ProtectedProjectsOrgSlugProjectSlugRoute =
+  ProtectedProjectsOrgSlugProjectSlugRouteImport.update({
+    id: '/_projects/$orgSlug/$projectSlug',
+    path: '/$orgSlug/$projectSlug',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
-const ProtectedOrganizationsOrgIdRoute =
-  ProtectedOrganizationsOrgIdRouteImport.update({
-    id: '/organizations/$orgId',
-    path: '/organizations/$orgId',
+const ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute =
+  ProtectedSchemasOrgSlugProjectSlugSchemaSlugRouteImport.update({
+    id: '/_schemas/$orgSlug/$projectSlug/$schemaSlug',
+    path: '/$orgSlug/$projectSlug/$schemaSlug',
     getParentRoute: () => ProtectedRouteRoute,
   } as any)
 
@@ -118,10 +118,10 @@ export interface FileRoutesByFullPath {
   '/verify-email': typeof PublicVerifyEmailRoute
   '/oauth2/redirect': typeof Oauth2RedirectRoute
   '/': typeof PublicIndexRoute
-  '/organizations/$orgId': typeof ProtectedOrganizationsOrgIdRoute
-  '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/schemas/$schemaId': typeof ProtectedSchemasSchemaIdRoute
+  '/organizations/$orgSlug': typeof ProtectedOrganizationsOrgSlugRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
+  '/$orgSlug/$projectSlug': typeof ProtectedProjectsOrgSlugProjectSlugRoute
+  '/$orgSlug/$projectSlug/$schemaSlug': typeof ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute
 }
 export interface FileRoutesByTo {
   '/$': typeof SplatRoute
@@ -133,10 +133,10 @@ export interface FileRoutesByTo {
   '/verify-email': typeof PublicVerifyEmailRoute
   '/oauth2/redirect': typeof Oauth2RedirectRoute
   '/': typeof PublicIndexRoute
-  '/organizations/$orgId': typeof ProtectedOrganizationsOrgIdRoute
-  '/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/schemas/$schemaId': typeof ProtectedSchemasSchemaIdRoute
+  '/organizations/$orgSlug': typeof ProtectedOrganizationsOrgSlugRoute
   '/organizations': typeof ProtectedOrganizationsIndexRoute
+  '/$orgSlug/$projectSlug': typeof ProtectedProjectsOrgSlugProjectSlugRoute
+  '/$orgSlug/$projectSlug/$schemaSlug': typeof ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -152,10 +152,10 @@ export interface FileRoutesById {
   '/_public/verify-email': typeof PublicVerifyEmailRoute
   '/oauth2/redirect': typeof Oauth2RedirectRoute
   '/_public/': typeof PublicIndexRoute
-  '/_protected/organizations/$orgId': typeof ProtectedOrganizationsOrgIdRoute
-  '/_protected/projects/$projectId': typeof ProtectedProjectsProjectIdRoute
-  '/_protected/schemas/$schemaId': typeof ProtectedSchemasSchemaIdRoute
+  '/_protected/organizations/$orgSlug': typeof ProtectedOrganizationsOrgSlugRoute
   '/_protected/organizations/': typeof ProtectedOrganizationsIndexRoute
+  '/_protected/_projects/$orgSlug/$projectSlug': typeof ProtectedProjectsOrgSlugProjectSlugRoute
+  '/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug': typeof ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -169,10 +169,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/oauth2/redirect'
     | '/'
-    | '/organizations/$orgId'
-    | '/projects/$projectId'
-    | '/schemas/$schemaId'
+    | '/organizations/$orgSlug'
     | '/organizations'
+    | '/$orgSlug/$projectSlug'
+    | '/$orgSlug/$projectSlug/$schemaSlug'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/$'
@@ -184,10 +184,10 @@ export interface FileRouteTypes {
     | '/verify-email'
     | '/oauth2/redirect'
     | '/'
-    | '/organizations/$orgId'
-    | '/projects/$projectId'
-    | '/schemas/$schemaId'
+    | '/organizations/$orgSlug'
     | '/organizations'
+    | '/$orgSlug/$projectSlug'
+    | '/$orgSlug/$projectSlug/$schemaSlug'
   id:
     | '__root__'
     | '/_auth'
@@ -202,10 +202,10 @@ export interface FileRouteTypes {
     | '/_public/verify-email'
     | '/oauth2/redirect'
     | '/_public/'
-    | '/_protected/organizations/$orgId'
-    | '/_protected/projects/$projectId'
-    | '/_protected/schemas/$schemaId'
+    | '/_protected/organizations/$orgSlug'
     | '/_protected/organizations/'
+    | '/_protected/_projects/$orgSlug/$projectSlug'
+    | '/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -309,25 +309,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProtectedOrganizationsIndexRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/schemas/$schemaId': {
-      id: '/_protected/schemas/$schemaId'
-      path: '/schemas/$schemaId'
-      fullPath: '/schemas/$schemaId'
-      preLoaderRoute: typeof ProtectedSchemasSchemaIdRouteImport
+    '/_protected/organizations/$orgSlug': {
+      id: '/_protected/organizations/$orgSlug'
+      path: '/organizations/$orgSlug'
+      fullPath: '/organizations/$orgSlug'
+      preLoaderRoute: typeof ProtectedOrganizationsOrgSlugRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/projects/$projectId': {
-      id: '/_protected/projects/$projectId'
-      path: '/projects/$projectId'
-      fullPath: '/projects/$projectId'
-      preLoaderRoute: typeof ProtectedProjectsProjectIdRouteImport
+    '/_protected/_projects/$orgSlug/$projectSlug': {
+      id: '/_protected/_projects/$orgSlug/$projectSlug'
+      path: '/$orgSlug/$projectSlug'
+      fullPath: '/$orgSlug/$projectSlug'
+      preLoaderRoute: typeof ProtectedProjectsOrgSlugProjectSlugRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
-    '/_protected/organizations/$orgId': {
-      id: '/_protected/organizations/$orgId'
-      path: '/organizations/$orgId'
-      fullPath: '/organizations/$orgId'
-      preLoaderRoute: typeof ProtectedOrganizationsOrgIdRouteImport
+    '/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug': {
+      id: '/_protected/_schemas/$orgSlug/$projectSlug/$schemaSlug'
+      path: '/$orgSlug/$projectSlug/$schemaSlug'
+      fullPath: '/$orgSlug/$projectSlug/$schemaSlug'
+      preLoaderRoute: typeof ProtectedSchemasOrgSlugProjectSlugSchemaSlugRouteImport
       parentRoute: typeof ProtectedRouteRoute
     }
   }
@@ -351,18 +351,20 @@ const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
 
 interface ProtectedRouteRouteChildren {
   ProtectedDashboardRoute: typeof ProtectedDashboardRoute
-  ProtectedOrganizationsOrgIdRoute: typeof ProtectedOrganizationsOrgIdRoute
-  ProtectedProjectsProjectIdRoute: typeof ProtectedProjectsProjectIdRoute
-  ProtectedSchemasSchemaIdRoute: typeof ProtectedSchemasSchemaIdRoute
+  ProtectedOrganizationsOrgSlugRoute: typeof ProtectedOrganizationsOrgSlugRoute
   ProtectedOrganizationsIndexRoute: typeof ProtectedOrganizationsIndexRoute
+  ProtectedProjectsOrgSlugProjectSlugRoute: typeof ProtectedProjectsOrgSlugProjectSlugRoute
+  ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute: typeof ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute
 }
 
 const ProtectedRouteRouteChildren: ProtectedRouteRouteChildren = {
   ProtectedDashboardRoute: ProtectedDashboardRoute,
-  ProtectedOrganizationsOrgIdRoute: ProtectedOrganizationsOrgIdRoute,
-  ProtectedProjectsProjectIdRoute: ProtectedProjectsProjectIdRoute,
-  ProtectedSchemasSchemaIdRoute: ProtectedSchemasSchemaIdRoute,
+  ProtectedOrganizationsOrgSlugRoute: ProtectedOrganizationsOrgSlugRoute,
   ProtectedOrganizationsIndexRoute: ProtectedOrganizationsIndexRoute,
+  ProtectedProjectsOrgSlugProjectSlugRoute:
+    ProtectedProjectsOrgSlugProjectSlugRoute,
+  ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute:
+    ProtectedSchemasOrgSlugProjectSlugSchemaSlugRoute,
 }
 
 const ProtectedRouteRouteWithChildren = ProtectedRouteRoute._addFileChildren(

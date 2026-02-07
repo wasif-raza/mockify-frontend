@@ -34,15 +34,16 @@ import {
 import { toast } from 'sonner';
 import { formatRelativeTime } from '@/lib/utils';
 
-export const Route = createFileRoute('/_protected/projects/$projectId')({
+export const Route = createFileRoute('/_protected/_projects/$orgSlug/$projectSlug')({
   component: ProjectDetail,
 });
 
 function ProjectDetail() {
-  const { projectId } = Route.useParams();
-  const { data: project, isLoading } = useProject(projectId);
-  const createSchemaMutation = useCreateSchema();
-  const deleteSchemaMutation = useDeleteSchema();
+  const { orgSlug, projectSlug } = Route.useParams();
+  const { data: project, isLoading } = useProject(orgSlug, projectSlug);
+
+  const createSchemaMutation = useCreateSchema(orgSlug, projectSlug);
+  const deleteSchemaMutation = useDeleteSchema(orgSlug, projectSlug);
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [schemaName, setSchemaName] = useState('');
@@ -66,9 +67,9 @@ function ProjectDetail() {
 
     try {
       const schemaJson = JSON.parse(schemaDefinition);
+      
       await createSchemaMutation.mutateAsync({
         name: schemaName,
-        projectId: projectId,
         schemaJson,
       });
       setSchemaName('');
@@ -79,14 +80,14 @@ function ProjectDetail() {
     }
   };
 
-  const handleDeleteSchema = async (id: string, name: string) => {
+  const handleDeleteSchema = async (schemaSlug: string, name: string) => {
     if (confirm(`Are you sure you want to delete "${name}"?`)) {
-      await deleteSchemaMutation.mutateAsync(id);
+      await deleteSchemaMutation.mutateAsync(schemaSlug);
     }
   };
 
   const copyEndpoint = (url: string) => {
-    navigator.clipboard.writeText(`${window.location.origin}/api/v1${url}`);
+    navigator.clipboard.writeText(`${window.location.origin}${url}`);
     toast.success('Endpoint URL copied to clipboard');
   };
 
@@ -119,8 +120,8 @@ function ProjectDetail() {
     <div className="space-y-6">
       <div>
         <Link
-          to="/organizations/$orgId"
-          params={{ orgId: project.organization.id }}
+          to="/organizations/$orgSlug"
+          params={{ orgSlug }}
         >
           <Button variant="ghost" size="sm" className="mb-4">
             <ArrowLeft className="mr-2 h-4 w-4" />
@@ -256,8 +257,12 @@ function ProjectDetail() {
                 <CardHeader>
                   <div className="flex items-start justify-between">
                     <Link
-                      to="/schemas/$schemaId"
-                      params={{ schemaId: schema.id }}
+                      to="/$orgSlug/$projectSlug/$schemaSlug"
+                      params={{ 
+                        orgSlug: orgSlug,
+                        projectSlug: projectSlug,
+                        schemaSlug: schema.slug,
+                      }}
                       className="flex-1"
                     >
                       <CardTitle className="hover:text-primary transition-colors">
@@ -268,7 +273,7 @@ function ProjectDetail() {
                       variant="ghost"
                       size="icon"
                       className="opacity-0 group-hover:opacity-100 transition-opacity"
-                      onClick={() => handleDeleteSchema(schema.id, schema.name)}
+                      onClick={() => handleDeleteSchema(schema.slug, schema.name)}
                     >
                       <Trash2 className="h-4 w-4" />
                     </Button>
@@ -290,7 +295,7 @@ function ProjectDetail() {
                     size="sm"
                     className="w-full gap-2"
                     onClick={() =>
-                      copyEndpoint(`/mock/schemas/${schema.id}/records`)
+                    copyEndpoint(`/${orgSlug}/${projectSlug}/${schema.slug}`)
                     }
                   >
                     <Copy className="h-3 w-3" />

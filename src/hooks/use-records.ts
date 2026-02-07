@@ -2,59 +2,72 @@ import { recordsApi } from '@/api/records';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
-export function useRecords(schemaId: string) {
+export function useRecords(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+) {
   return useQuery({
-    queryKey: ['schemas', schemaId, 'records'],
-    queryFn: () => recordsApi.getAll(schemaId),
-    enabled: !!schemaId,
+    queryKey: ['records', orgSlug, projectSlug, schemaSlug],
+    queryFn: () =>
+      recordsApi.getAll(orgSlug, projectSlug, schemaSlug),
+    enabled: !!orgSlug && !!projectSlug && !!schemaSlug,
   });
 }
 
-export function useRecord(id: string) {
+export function useRecord(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+  recordId: string
+) {
   return useQuery({
-    queryKey: ['records', id],
-    queryFn: () => recordsApi.getById(id),
-    enabled: !!id,
+    queryKey: ['records', recordId],
+    queryFn: () => recordsApi.getById(orgSlug, projectSlug, schemaSlug, recordId),
+    enabled: !!recordId,
   });
 }
 
-export function useCreateRecord() {
+export function useCreateRecord(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      schemaId,
-      data,
-    }: {
-      schemaId: string;
-      data: { data: Record<string, any> };
-    }) => recordsApi.create(schemaId, data),
-    onSuccess: (result) => {
+    mutationFn: (data: Record<string, any>) =>
+      recordsApi.create(orgSlug, projectSlug, schemaSlug, data),
+
+    onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ['schemas', result.schemaId, 'records'],
+        queryKey: ['records', orgSlug, projectSlug, schemaSlug],
       });
       queryClient.invalidateQueries({
-        queryKey: ['schemas', result.schemaId],
+        queryKey: ['schemas', orgSlug, projectSlug, schemaSlug],
       });
       toast.success('Record created successfully');
     },
+
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to create record');
     },
   });
 }
 
-export function useUpdateRecord() {
+export function useUpdateRecord(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+  recordId: string
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string;
-      data: { data: Record<string, any> };
-    }) => recordsApi.update(id, data),
+
+    mutationFn: (data: Record<string, any>) =>
+      recordsApi.update(orgSlug, projectSlug, schemaSlug, recordId, data),
+
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: ['records', result.id] });
       queryClient.invalidateQueries({
@@ -68,16 +81,24 @@ export function useUpdateRecord() {
   });
 }
 
-export function useDeleteRecord() {
+export function useDeleteRecord(
+  orgSlug: string,
+  projectSlug: string,
+  schemaSlug: string,
+) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: string) => recordsApi.delete(id),
+    mutationFn: (recordId: string) =>
+      recordsApi.delete(orgSlug, projectSlug, schemaSlug, recordId),
+
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['schemas'] });
-      queryClient.invalidateQueries({ queryKey: ['records'] });
+      queryClient.invalidateQueries({
+        queryKey: ['schemas', orgSlug, projectSlug, schemaSlug],
+      });
       toast.success('Record deleted successfully');
     },
+
     onError: (error: any) => {
       toast.error(error.response?.data?.message || 'Failed to delete record');
     },
