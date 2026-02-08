@@ -17,6 +17,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { useOrganizations } from '@/hooks/use-organizations';
 import { LoadingSpinner } from '@/components/shared/LoadingSpinner';
+import { useUserStats } from '@/hooks/use-DashboardStats';
 
 export const Route = createFileRoute('/_protected/dashboard')({
   component: DashboardPage,
@@ -24,9 +25,13 @@ export const Route = createFileRoute('/_protected/dashboard')({
 
 export function DashboardPage() {
   const { user } = useAuth();
-  const { data: organizations = [], isLoading } = useOrganizations();
+  const { data: organizations, isLoading } = useOrganizations();
+  const { data: userStats, isLoading: isUserStatsLoading, error } = useUserStats();
+  console.log("User stats: ", userStats);
+  console.log("Error: ", error);
+  console.log(organizations);
 
-  if (isLoading) {
+  if (isLoading || isUserStatsLoading) {
     return <LoadingSpinner fullScreen />;
   }
 
@@ -52,7 +57,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {organizations.length}
+              {isUserStatsLoading ? '...' : userStats?.organizationCount}
             </div>
             <p className="text-xs text-muted-foreground">
               Total organizations
@@ -67,10 +72,7 @@ export function DashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {organizations.reduce(
-                (acc, org) => acc + org.projectCount,
-                0
-              )}
+              {isUserStatsLoading ? '...' : userStats?.projectCount}
             </div>
             <p className="text-xs text-muted-foreground">
               Across all organizations
@@ -84,10 +86,10 @@ export function DashboardPage() {
             <FileCode className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              Mock data schemas
-            </p>
+            <div className="text-2xl font-bold">
+              {isUserStatsLoading ? '...' : userStats?.schemaCount}
+            </div>
+            <p className="text-xs text-muted-foreground">Mock data schemas</p>
           </CardContent>
         </Card>
 
@@ -97,7 +99,9 @@ export function DashboardPage() {
             <Database className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">
+              {isUserStatsLoading ? '...' : userStats?.recordCount}
+            </div>
             <p className="text-xs text-muted-foreground">
               Mock records created
             </p>
